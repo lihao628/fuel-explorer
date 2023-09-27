@@ -15,9 +15,13 @@ COPY . /app
 WORKDIR /app
 
 RUN pnpm install --frozen-lockfile
+RUN pnpm turbo:run build --filter=graphql
 
-EXPOSE 4444
+FROM base AS run
+
+COPY --from=base /app/node_modules /app/node_modules
+COPY --from=base /app/packages/graphql /app/packages/graphql
 
 WORKDIR /app/packages/graphql
 
-CMD ["pnpm", "start"]
+CMD ["pm2", "start", "./dist/index.js"]
