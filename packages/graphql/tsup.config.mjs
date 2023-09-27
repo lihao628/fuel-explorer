@@ -6,6 +6,7 @@ export default defineConfig({
   format: ['cjs'],
   esbuildPlugins: [graphqlLoaderPlugin.default()],
   sourcemap: true,
+  noExternal: [/.*/],
   entry: {
     index: 'src/bin.ts',
   },

@@ -1,27 +1,20 @@
 # This image contains the graphql server
 # built for the fuel-explorer
-FROM node:20-slim AS base
+FROM node:20-slim as build
+RUN corepack enable
 
-# Expose the ENVs to the env of the container
-ENV PORT="${PORT}"
-ENV FUEL_PROVIDER_URL="${FUEL_PROVIDER_URL}"
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
-# Enable pnpm using corepack form node.js
-RUN corepack enable
-
-COPY . /app
 WORKDIR /app
+COPY . /app
 
 RUN pnpm install --frozen-lockfile
 RUN pnpm turbo:run build --filter=graphql
 
-FROM base AS run
+FROM node:20-slim as main
 
-COPY --from=base /app/node_modules /app/node_modules
-COPY --from=base /app/packages/graphql /app/packages/graphql
+RUN npm i -g pm2
+COPY --from=build /app/packages/graphql/dist /app
 
-WORKDIR /app/packages/graphql
-
-CMD ["pm2", "start", "./dist/index.js"]
+CMD ["pm2", "start", "/app/index.js", "--no-daemon"]
