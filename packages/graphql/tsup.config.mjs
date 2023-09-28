@@ -11,5 +11,6 @@ export default defineConfig({
     index: 'src/bin.ts',
   },
   minify: false,
+  clean: true,
   splitting: false,
 });
